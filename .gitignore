@@ -1,3 +1,4 @@
 .DS_Store
-SearchMap/bin*
-SearchMap/gen*
+/SearchMap/bin/*
+/SearchMap/gen/*
+/SearchMap/AndroidManifest.xml
