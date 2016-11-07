@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
 	    /** 
 	     * 定位的监听器 
 	     */  
-	    public MyLocationListener mMyLocationListener;  
+	//    public MyLocationListener mMyLocationListener;  
 	    /** 
 	     * 当前定位的模式 
 	     */  
@@ -39,19 +39,19 @@ public class MainActivity extends Activity {
 	    /** 
 	     * 初始化定位相关代码 
 	     */  
-	    private void initMyLocation()  
-	    {  
-	        // 定位初始化  
-	        mLocationClient = new LocationClient(this);  
-	        mMyLocationListener = new MyLocationListener();  
-	        mLocationClient.registerLocationListener(mMyLocationListener);  
-	        // 设置定位的相关配置  
-	        LocationClientOption option = new LocationClientOption();  
-	        option.setOpenGps(true);// 打开gps  
-	        option.setCoorType("bd09ll"); // 设置坐标类型  
-	        option.setScanSpan(1000);  
-	        mLocationClient.setLocOption(option);  
-	    }  
+//	    private void initMyLocation()  
+//	    {  
+//	        // 定位初始化  
+//	        mLocationClient = new LocationClient(this);  
+//	        mMyLocationListener = new MyLocationListener();  
+//	        mLocationClient.registerLocationListener(mMyLocationListener);  
+//	        // 设置定位的相关配置  
+//	        LocationClientOption option = new LocationClientOption();  
+//	        option.setOpenGps(true);// 打开gps  
+//	        option.setCoorType("bd09ll"); // 设置坐标类型  
+//	        option.setScanSpan(1000);  
+//	        mLocationClient.setLocOption(option);  
+//	    }  
 	
 	
     MapView mMapView = null;  
@@ -72,43 +72,43 @@ public class MainActivity extends Activity {
      * @author fpjoy
      *	实现位置回调监听
      */
-    public class MyLocationListener implements BDLocationListener{
-
-    	@Override
-    	public void onReceiveLocation(BDLocation arg0) {
-    		// TODO Auto-generated method stub
-    		 // map view 销毁后不在处理新接收的位置  
-            if (location == null || mMapView == null)  
-                return;  
-            // 构造定位数据  
-            MyLocationData locData = new MyLocationData.Builder()  
-                    .accuracy(location.getRadius())  
-                    // 此处设置开发者获取到的方向信息，顺时针0-360  
-                    .direction(mXDirection).latitude(location.getLatitude())  
-                    .longitude(location.getLongitude()).build();  
-            mCurrentAccracy = location.getRadius();  
-            // 设置定位数据  
-            mBaiduMap.setMyLocationData(locData);  
-            mCurrentLantitude = location.getLatitude();  
-            mCurrentLongitude = location.getLongitude();  
-            // 设置自定义图标  
-            BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory  
-                    .fromResource(R.drawable.navi_map_gps_locked);  
-            MyLocationConfigeration config = new MyLocationConfigeration(  
-                    mCurrentMode, true, mCurrentMarker);  
-            mBaiduMap.setMyLocationConfigeration(config);  
-            // 第一次定位时，将地图位置移动到当前位置  
-            if (isFristLocation)  
-            {  
-                isFristLocation = false;  
-                LatLng ll = new LatLng(location.getLatitude(),  
-                        location.getLongitude());  
-                MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);  
-                mBaiduMap.animateMapStatus(u);  
-            }  
-    	}
-
-    }
+//    public class MyLocationListener implements BDLocationListener{
+//
+//    	@Override
+//    	public void onReceiveLocation(BDLocation arg0) {
+//    		// TODO Auto-generated method stub
+//    		 // map view 销毁后不在处理新接收的位置  
+//            if (location == null || mMapView == null)  
+//                return;  
+//            // 构造定位数据  
+//            MyLocationData locData = new MyLocationData.Builder()  
+//                    .accuracy(location.getRadius())  
+//                    // 此处设置开发者获取到的方向信息，顺时针0-360  
+//                    .direction(mXDirection).latitude(location.getLatitude())  
+//                    .longitude(location.getLongitude()).build();  
+//            mCurrentAccracy = location.getRadius();  
+//            // 设置定位数据  
+//            mBaiduMap.setMyLocationData(locData);  
+//            mCurrentLantitude = location.getLatitude();  
+//            mCurrentLongitude = location.getLongitude();  
+//            // 设置自定义图标  
+//            BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory  
+//                    .fromResource(R.drawable.navi_map_gps_locked);  
+//            MyLocationConfigeration config = new MyLocationConfigeration(  
+//                    mCurrentMode, true, mCurrentMarker);  
+//            mBaiduMap.setMyLocationConfigeration(config);  
+//            // 第一次定位时，将地图位置移动到当前位置  
+//            if (isFristLocation)  
+//            {  
+//                isFristLocation = false;  
+//                LatLng ll = new LatLng(location.getLatitude(),  
+//                        location.getLongitude());  
+//                MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);  
+//                mBaiduMap.animateMapStatus(u);  
+//            }  
+//    	}
+//
+//    }
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
