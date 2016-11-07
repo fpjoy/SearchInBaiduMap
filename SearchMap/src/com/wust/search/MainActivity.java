@@ -5,6 +5,7 @@ import com.baidu.mapapi.map.MapView;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Menu;
 
 
 
@@ -20,6 +21,14 @@ public class MainActivity extends Activity {
         //获取地图控件引用  
         mMapView = (MapView) findViewById(R.id.bmapView);  
     }  
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	// TODO Auto-generated method stub
+    	getMenuInflater().inflate(R.menu.main, menu);
+    	return super.onCreateOptionsMenu(menu);
+    }
+    
     @Override  
     protected void onDestroy() {  
         super.onDestroy();  
