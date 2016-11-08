@@ -80,6 +80,16 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		// 获取地图控件引用
 		mMapView = (MapView) findViewById(R.id.bmapView);
+		isFristLocation = true;
+		// 获取地图控件引用
+		mMapView = (MapView) findViewById(R.id.bmapView);
+		
+		// 获得地图的实例
+		mBaiduMap = mMapView.getMap();
+	//	mIconMaker = BitmapDescriptorFactory.fromResource(R.drawable.maker);
+		MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(15.0f);
+		mBaiduMap.setMapStatus(msu);
+		initMyLocation();
 
 	}
 
@@ -118,6 +128,7 @@ public class MainActivity extends Activity {
 				LatLng ll = new LatLng(location.getLatitude(),
 						location.getLongitude());
 				MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);
+				System.out.println("-----5------lat,lng"+location.getLatitude()+","+location.getLongitude());
 				mBaiduMap.animateMapStatus(u);
 			}
 		}
