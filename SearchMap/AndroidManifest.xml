@@ -33,7 +33,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/search_name" >
+            android:label="" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -54,7 +54,7 @@
         
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="FGZonirdYs6xbHW6cIyNgfWpC3OmtIu8" />
+            android:value="ARRKCU8T8Va22NyUQF0wjcUPoDgO3eeM" />
     </application>
 
 </manifest>
