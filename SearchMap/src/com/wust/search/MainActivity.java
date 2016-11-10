@@ -49,11 +49,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	// 定位图层显示方式 COMPASS,FOLLOWING,NORMAL
 	private LocationMode mCurrentMode;
-	
+
 	// 是否是第一次定位
 	private boolean isFirstLoc;
-	
-	
+
 	// 位图描述信息
 	private BitmapDescriptor mCurrentIcon;
 
@@ -77,9 +76,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 获取地图控件引用
 
 		initView();
-		 mBaiduMap
-         .setMyLocationConfigeration(new MyLocationConfiguration(
-                 mCurrentMode, true, mCurrentIcon));
+
 		initLoc();
 
 	}
@@ -89,24 +86,25 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 地图初始化
 		mMapView = (MapView) findViewById(R.id.bmapView);
 		mBaiduMap = mMapView.getMap();
-		
+
 		mLocButton = (Button) findViewById(R.id.button_location);
 
 		mLocButton.setOnClickListener(this);
 	}
-	
+
 	// 定位初始化
-	private void initLoc(){
+	private void initLoc() {
 		isFirstLoc = true;
+		mCurrentMode=LocationMode.NORMAL;
 		mLocClient = new LocationClient(this);
 		mLocListener = new MyLocationListener();
-        mLocClient.registerLocationListener(mLocListener);
-        LocationClientOption option = new LocationClientOption();
-        option.setOpenGps(true); // 打开gps
-        option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(1000);
-        mLocClient.setLocOption(option);
-		
+		mLocClient.registerLocationListener(mLocListener);
+		LocationClientOption option = new LocationClientOption();
+		option.setOpenGps(true); // 打开gps
+		option.setCoorType("bd09ll"); // 设置坐标类型
+		option.setScanSpan(1000);
+		mLocClient.setLocOption(option);
+
 	}
 
 	@Override
@@ -114,7 +112,26 @@ public class MainActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.button_location:
-				
+			switch(mCurrentMode){
+			case NORMAL:
+			mCurrentMode = LocationMode.FOLLOWING;
+			mBaiduMap
+					.setMyLocationConfigeration(new MyLocationConfiguration(
+							mCurrentMode, true, mCurrentIcon));
+			break;
+			case FOLLOWING:
+				mCurrentMode = LocationMode.COMPASS;
+				mBaiduMap
+						.setMyLocationConfigeration(new MyLocationConfiguration(
+								mCurrentMode, true, mCurrentIcon));
+				break;
+			case COMPASS:
+				mCurrentMode = LocationMode.NORMAL;
+				mBaiduMap
+						.setMyLocationConfigeration(new MyLocationConfiguration(
+								mCurrentMode, true, mCurrentIcon));
+				break;	
+			}
 			break;
 		default:
 			break;
@@ -128,21 +145,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	/**
-	 * 地图移动到我的位置,此处可以重新发定位请求，然后定位； 直接拿最近一次经纬度，如果长时间没有定位成功，可能会显示效果不好
-	 */
-	private void center2myLoc() {
-		LatLng ll = new LatLng(mCurrentLat, mCurrentLng);
-		MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);
-		mBaiduMap.animateMapStatus(u);
-	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
 		case R.id.id_menu_map_myLoc:
-			center2myLoc();
+	//		center2myLoc();
 			break;
 		default:
 			break;
@@ -171,37 +179,37 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 		return super.onMenuOpened(featureId, menu);
 	}
-	
-	private class MyLocationListener implements BDLocationListener{
+
+	private class MyLocationListener implements BDLocationListener {
 
 		@Override
 		public void onReceiveLocation(BDLocation location) {
 			// TODO Auto-generated method stub
-			 // map view 销毁后不在处理新接收的位置
-            if (location == null || mMapView == null) {
-                return;
-            }
-            MyLocationData locData = new MyLocationData.Builder()
-                    .accuracy(location.getRadius())
-                            // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(100).latitude(location.getLatitude())
-                    .longitude(location.getLongitude()).build();
-            mBaiduMap.setMyLocationData(locData);
-            if (isFirstLoc) {
-                isFirstLoc = false;
-                mCurrentLat = location.getLatitude();
-                mCurrentLng = location.getLongitude();
-                LatLng ll = new LatLng(mCurrentLat,
-                        mCurrentLng);
-                MapStatus.Builder builder = new MapStatus.Builder();
-                builder.target(ll).zoom(18.0f);
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-            }
-        }
+			// map view 销毁后不在处理新接收的位置
+			if (location == null || mMapView == null) {
+				return;
+			}
+			MyLocationData locData = new MyLocationData.Builder()
+					.accuracy(location.getRadius())
+					// 此处设置开发者获取到的方向信息，顺时针0-360
+					.direction(100).latitude(location.getLatitude())
+					.longitude(location.getLongitude()).build();
+			mBaiduMap.setMyLocationData(locData);
+			if (isFirstLoc) {
+				isFirstLoc = false;
+				mCurrentLat = location.getLatitude();
+				mCurrentLng = location.getLongitude();
+				LatLng ll = new LatLng(mCurrentLat, mCurrentLng);
+				MapStatus.Builder builder = new MapStatus.Builder();
+				builder.target(ll).zoom(18.0f);
+				mBaiduMap.animateMapStatus(MapStatusUpdateFactory
+						.newMapStatus(builder.build()));
+			}
+		}
 
-        public void onReceivePoi(BDLocation poiLocation) {
-        }
-		
+		public void onReceivePoi(BDLocation poiLocation) {
+		}
+
 	}
 
 	@Override
