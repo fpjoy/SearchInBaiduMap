@@ -20,6 +20,8 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.wust.search.MyOrientationListener;
+import com.wust.search.MyOrientationListener.OnOrientationListener;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -60,6 +62,15 @@ public class MainActivity extends Activity implements OnClickListener {
 	private double mCurrentLng;
 	private double mCurrentLat;
 
+	// 方向传感器监听器
+	private MyOrientationListener mOrientationListener;
+
+	// 当前的精度
+	private float mCurrentAccracy;
+
+	// 方向传感器X方向的值
+	private int mXDirection;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -79,6 +90,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		initLoc();
 
+		// 传感器初始化
+		initOritationListener();
+
 	}
 
 	// 视图初始化
@@ -92,10 +106,39 @@ public class MainActivity extends Activity implements OnClickListener {
 		mLocButton.setOnClickListener(this);
 	}
 
+	// 传感器初始化
+	private void initOritationListener() {
+		// TODO Auto-generated method stub
+		mOrientationListener = new MyOrientationListener(
+				getApplicationContext());
+		mOrientationListener
+				.setOnOrientationListener(new OnOrientationListener() {
+					@Override
+					public void onOrientationChanged(float x) {
+						mXDirection = (int) x;
+						// 构造定位数据
+						MyLocationData locData = new MyLocationData.Builder()
+								.accuracy(mCurrentAccracy)
+								// 此处设置开发者获取到的方向信息，顺时针0-360
+								.direction(mXDirection).latitude(mCurrentLat)
+								.longitude(mCurrentLng).build();
+						// 设置定位数据
+						mBaiduMap.setMyLocationData(locData);
+						// 设置自定义图标
+						BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory
+								.fromResource(R.drawable.navi_map_gps);
+						MyLocationConfiguration config = new MyLocationConfiguration(
+								mCurrentMode, true, mCurrentMarker);
+						mBaiduMap.setMyLocationConfigeration(config);
+
+					}
+				});
+	}
+
 	// 定位初始化
 	private void initLoc() {
 		isFirstLoc = true;
-		mCurrentMode=LocationMode.NORMAL;
+		mCurrentMode = LocationMode.NORMAL;
 		mLocClient = new LocationClient(this);
 		mLocListener = new MyLocationListener();
 		mLocClient.registerLocationListener(mLocListener);
@@ -112,13 +155,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.button_location:
-			switch(mCurrentMode){
+			switch (mCurrentMode) {
 			case NORMAL:
-			mCurrentMode = LocationMode.FOLLOWING;
-			mBaiduMap
-					.setMyLocationConfigeration(new MyLocationConfiguration(
-							mCurrentMode, true, mCurrentIcon));
-			break;
+				mCurrentMode = LocationMode.FOLLOWING;
+				mBaiduMap
+						.setMyLocationConfigeration(new MyLocationConfiguration(
+								mCurrentMode, true, mCurrentIcon));
+				break;
 			case FOLLOWING:
 				mCurrentMode = LocationMode.COMPASS;
 				mBaiduMap
@@ -130,7 +173,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				mBaiduMap
 						.setMyLocationConfigeration(new MyLocationConfiguration(
 								mCurrentMode, true, mCurrentIcon));
-				break;	
+				break;
 			}
 			break;
 		default:
@@ -150,7 +193,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		switch (item.getItemId()) {
 		case R.id.id_menu_map_myLoc:
-	//		center2myLoc();
+			// center2myLoc();
 			break;
 		default:
 			break;
@@ -192,9 +235,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			MyLocationData locData = new MyLocationData.Builder()
 					.accuracy(location.getRadius())
 					// 此处设置开发者获取到的方向信息，顺时针0-360
-					.direction(100).latitude(location.getLatitude())
+					.direction(mXDirection).latitude(location.getLatitude())
 					.longitude(location.getLongitude()).build();
 			mBaiduMap.setMyLocationData(locData);
+			mCurrentAccracy = location.getRadius();
 			if (isFirstLoc) {
 				isFirstLoc = false;
 				mCurrentLat = location.getLatitude();
@@ -232,7 +276,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		mLocClient.stop();
 
 		// 关闭方向传感器
-		// myOrientationListener.stop();
+		mOrientationListener.stop();
 		super.onStop();
 	}
 
