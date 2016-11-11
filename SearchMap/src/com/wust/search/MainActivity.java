@@ -124,13 +124,6 @@ public class MainActivity extends Activity implements OnClickListener {
 								.longitude(mCurrentLng).build();
 						// 设置定位数据
 						mBaiduMap.setMyLocationData(locData);
-						// 设置自定义图标
-						BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory
-								.fromResource(R.drawable.navi_map_gps);
-						MyLocationConfiguration config = new MyLocationConfiguration(
-								mCurrentMode, true, mCurrentMarker);
-						mBaiduMap.setMyLocationConfigeration(config);
-
 					}
 				});
 	}
@@ -264,7 +257,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			mLocClient.start();
 		}
 		// // 开启方向传感器
-		// myOrientationListener.start();
+		mOrientationListener.start();
 		super.onStart();
 	}
 
