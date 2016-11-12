@@ -44,6 +44,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -276,9 +277,19 @@ public class MainActivity extends Activity implements OnClickListener {
 		    }
 		    public void onMarkerDragEnd(Marker marker) {
 		        //ÍÏ×§½áÊø
+		    	markers.add(marker);
+		    	for(Marker m: markers){
+		    		System.out.println(m.getPosition());
+		    	}
 		    }
 		    public void onMarkerDragStart(Marker marker) {
 		        //¿ªÊ¼ÍÏ×§
+		    	for(int x=0;x<markers.size();x++){
+		    		if(markers.get(x).getPosition()==marker.getPosition()){
+		    			markers.remove(x);
+		    			x--;
+		    		}
+		    	}
 		    }
 		});
 	}
