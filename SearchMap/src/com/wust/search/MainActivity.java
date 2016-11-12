@@ -13,6 +13,7 @@ import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMap.OnMapClickListener;
 import com.baidu.mapapi.map.BaiduMap.OnMarkerClickListener;
+import com.baidu.mapapi.map.BaiduMap.OnMarkerDragListener;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
@@ -214,7 +215,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			markerIcon = BitmapDescriptorFactory
 					.fromResource(R.drawable.icon_gcoding);
 			OverlayOptions option = new MarkerOptions().position(point).icon(
-					markerIcon);
+					markerIcon).draggable(true);
 
 			Marker marker = (Marker) mBaiduMap.addOverlay(option);
 
@@ -267,8 +268,23 @@ public class MainActivity extends Activity implements OnClickListener {
 				mBaiduMap.hideInfoWindow();
 			}
 		});
+		
+		//调用BaiduMap对象的setOnMarkerDragListener方法设置marker拖拽的监听
+		mBaiduMap.setOnMarkerDragListener(new OnMarkerDragListener() {
+		    public void onMarkerDrag(Marker marker) {
+		        //拖拽中
+		    }
+		    public void onMarkerDragEnd(Marker marker) {
+		        //拖拽结束
+		    }
+		    public void onMarkerDragStart(Marker marker) {
+		        //开始拖拽
+		    }
+		});
 	}
-
+	
+	//
+	
 	/**
 	 * 默认点击menu菜单，菜单项不现实图标，反射强制其显示
 	 */
