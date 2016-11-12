@@ -10,15 +10,23 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.location.Poi;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMap.OnMapClickListener;
+import com.baidu.mapapi.map.BaiduMap.OnMarkerClickListener;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.InfoWindow.OnInfoWindowClickListener;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.wust.search.MyOrientationListener;
 import com.wust.search.MyOrientationListener.OnOrientationListener;
@@ -55,8 +63,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	// 是否是第一次定位
 	private boolean isFirstLoc;
 
-	// 位图描述信息
+	// 当前图标 以及 mark图标
 	private BitmapDescriptor mCurrentIcon;
+	private BitmapDescriptor markerIcon;
 
 	// 当前的经纬度
 	private double mCurrentLng;
@@ -70,6 +79,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	// 方向传感器X方向的值
 	private int mXDirection;
+	
+	private InfoWindow mInfoWindow;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +103,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		// 传感器初始化
 		initOritationListener();
+		
+		// marker点击事件
+		initMarkerClick();
+		
+		// map点击事件
+		initMapClick();
 
 	}
 
@@ -180,13 +197,20 @@ public class MainActivity extends Activity implements OnClickListener {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
-
+	
+	// 菜单menu项目点击事件
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
-		case R.id.id_menu_map_myLoc:
-			// center2myLoc();
+		case R.id.id_marker:
+			LatLng point = new LatLng(mCurrentLat+Math.random()*0.005,mCurrentLng+Math.random()*0.005); 
+			markerIcon = BitmapDescriptorFactory  
+				    .fromResource(R.drawable.icon_gcoding); 
+			OverlayOptions option = new MarkerOptions()  
+		    .position(point).icon(markerIcon); 
+			System.out.println("------------1-------------");
+			mBaiduMap.addOverlay(option);
 			break;
 		default:
 			break;
@@ -194,7 +218,52 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		return super.onOptionsItemSelected(item);
 	}
+	
+	// 为marker设置点击事件
+	private void initMarkerClick(){
+		mBaiduMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+			
+			@Override
+			public boolean onMarkerClick(final Marker marker) {
+				Button button = new Button(getApplicationContext());
+				button.setBackgroundResource(R.drawable.location_tips);
+              //  OnInfoWindowClickListener listener = null;
+                button.setText("删除");
+                button.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        marker.remove();
+                        mBaiduMap.hideInfoWindow();
+                    }
+                });
+                LatLng ll = marker.getPosition();
+                mInfoWindow = new InfoWindow(button, ll, -47);
+                mBaiduMap.showInfoWindow(mInfoWindow);
+				return true;
+			}
+		});
+		
+	}
+	
+	// map点击事件
+	private void initMapClick(){
+		mBaiduMap.setOnMapClickListener(new OnMapClickListener()
+		{
 
+			@Override
+			public boolean onMapPoiClick(MapPoi arg0)
+			{
+				return false;
+			}
+
+			@Override
+			public void onMapClick(LatLng arg0)
+			{	
+				// 隐藏marker点击弹出的button
+				mBaiduMap.hideInfoWindow();
+			}
+		});
+	}
+	
 	/**
 	 * 默认点击menu菜单，菜单项不现实图标，反射强制其显示
 	 */

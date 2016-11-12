@@ -10,9 +10,9 @@
         android:title="@string/action_settings"/>
     
      <item
-        android:id="@+id/id_menu_map_myLoc"
+        android:id="@+id/id_marker"
         android:icon="@drawable/ic_launcher"
         android:showAsAction="never"
-        android:title="我的位置"/>
+        android:title="增加marker"/>
 
 </menu>
