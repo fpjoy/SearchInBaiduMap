@@ -1,6 +1,7 @@
 package com.wust.search;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.baidu.location.BDLocation;
@@ -79,8 +80,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	// 方向传感器X方向的值
 	private int mXDirection;
-	
+
+	// 在地图中显示一个信息窗口
 	private InfoWindow mInfoWindow;
+
+	private List<Marker> markers = new ArrayList<Marker>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,10 +107,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		// 传感器初始化
 		initOritationListener();
-		
+
 		// marker点击事件
 		initMarkerClick();
-		
+
 		// map点击事件
 		initMapClick();
 
@@ -121,6 +125,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		mLocButton = (Button) findViewById(R.id.button_location);
 
 		mLocButton.setOnClickListener(this);
+
 	}
 
 	// 传感器初始化
@@ -197,20 +202,23 @@ public class MainActivity extends Activity implements OnClickListener {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	// 菜单menu项目点击事件
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
 		case R.id.id_marker:
-			LatLng point = new LatLng(mCurrentLat+Math.random()*0.005,mCurrentLng+Math.random()*0.005); 
-			markerIcon = BitmapDescriptorFactory  
-				    .fromResource(R.drawable.icon_gcoding); 
-			OverlayOptions option = new MarkerOptions()  
-		    .position(point).icon(markerIcon); 
-			System.out.println("------------1-------------");
-			mBaiduMap.addOverlay(option);
+			LatLng point = new LatLng(mCurrentLat + Math.random() * 0.005,
+					mCurrentLng + Math.random() * 0.005);
+			markerIcon = BitmapDescriptorFactory
+					.fromResource(R.drawable.icon_gcoding);
+			OverlayOptions option = new MarkerOptions().position(point).icon(
+					markerIcon);
+
+			Marker marker = (Marker) mBaiduMap.addOverlay(option);
+
+			markers.add(marker);
 			break;
 		default:
 			break;
@@ -218,52 +226,49 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	// 为marker设置点击事件
-	private void initMarkerClick(){
+	private void initMarkerClick() {
 		mBaiduMap.setOnMarkerClickListener(new OnMarkerClickListener() {
-			
+
 			@Override
 			public boolean onMarkerClick(final Marker marker) {
 				Button button = new Button(getApplicationContext());
 				button.setBackgroundResource(R.drawable.location_tips);
-              //  OnInfoWindowClickListener listener = null;
-                button.setText("删除");
-                button.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
-                        marker.remove();
-                        mBaiduMap.hideInfoWindow();
-                    }
-                });
-                LatLng ll = marker.getPosition();
-                mInfoWindow = new InfoWindow(button, ll, -47);
-                mBaiduMap.showInfoWindow(mInfoWindow);
+				// OnInfoWindowClickListener listener = null;
+				button.setText("删除");
+				button.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						marker.remove();
+						mBaiduMap.hideInfoWindow();
+					}
+				});
+				LatLng ll = marker.getPosition();
+				mInfoWindow = new InfoWindow(button, ll, -47);
+				mBaiduMap.showInfoWindow(mInfoWindow);
 				return true;
 			}
 		});
-		
+
 	}
-	
+
 	// map点击事件
-	private void initMapClick(){
-		mBaiduMap.setOnMapClickListener(new OnMapClickListener()
-		{
+	private void initMapClick() {
+		mBaiduMap.setOnMapClickListener(new OnMapClickListener() {
 
 			@Override
-			public boolean onMapPoiClick(MapPoi arg0)
-			{
+			public boolean onMapPoiClick(MapPoi arg0) {
 				return false;
 			}
 
 			@Override
-			public void onMapClick(LatLng arg0)
-			{	
+			public void onMapClick(LatLng arg0) {
 				// 隐藏marker点击弹出的button
 				mBaiduMap.hideInfoWindow();
 			}
 		});
 	}
-	
+
 	/**
 	 * 默认点击menu菜单，菜单项不现实图标，反射强制其显示
 	 */
