@@ -29,6 +29,8 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.Polyline;
+import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.wust.search.MyOrientationListener;
 import com.wust.search.MyOrientationListener.OnOrientationListener;
@@ -86,8 +88,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	// 在地图中显示一个信息窗口
 	private InfoWindow mInfoWindow;
 
+	// 用户标记点的集合
 	private List<Marker> markers = new ArrayList<Marker>();
-
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -211,8 +215,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		switch (item.getItemId()) {
 		case R.id.id_marker:
-			LatLng point = new LatLng(mCurrentLat + Math.random() * 0.005,
-					mCurrentLng + Math.random() * 0.005);
+			LatLng point = new LatLng(mCurrentLat + (Math.random()-0.5) * 0.005,
+					mCurrentLng + (Math.random()-0.5) * 0.005);
 			markerIcon = BitmapDescriptorFactory
 					.fromResource(R.drawable.icon_gcoding);
 			OverlayOptions option = new MarkerOptions().position(point).icon(
@@ -221,6 +225,22 @@ public class MainActivity extends Activity implements OnClickListener {
 			Marker marker = (Marker) mBaiduMap.addOverlay(option);
 
 			markers.add(marker);
+			break;
+		case R.id.id_lines:
+			List<LatLng> points = new ArrayList<LatLng>();
+			points.add(new LatLng(mCurrentLat, mCurrentLng));
+			for(Marker m : markers){
+				points.add(m.getPosition());
+			}
+			BitmapDescriptor mRedTexture = BitmapDescriptorFactory.fromAsset("icon_road_green_arrow.png");
+
+			OverlayOptions ooPolyline = new PolylineOptions().width(10)
+			       .points(points).dottedLine(true).customTexture(mRedTexture);
+			//添加在地图中
+			Polyline  mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
+			break;
+		case R.id.clear:
+			mMapView.getMap().clear();
 			break;
 		default:
 			break;
@@ -296,9 +316,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	
 	//
 	
-	/**
-	 * 默认点击menu菜单，菜单项不现实图标，反射强制其显示
-	 */
+	
+	// 默认点击menu菜单，菜单项不现实图标，反射强制其显示
+	 
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 
@@ -337,7 +357,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				isFirstLoc = false;
 				mCurrentLat = location.getLatitude();
 				mCurrentLng = location.getLongitude();
+				
 				LatLng ll = new LatLng(mCurrentLat, mCurrentLng);
+				
 				MapStatus.Builder builder = new MapStatus.Builder();
 				builder.target(ll).zoom(18.0f);
 				mBaiduMap.animateMapStatus(MapStatusUpdateFactory
