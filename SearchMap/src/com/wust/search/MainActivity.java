@@ -240,7 +240,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			Polyline  mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
 			break;
 		case R.id.clear:
+			// 清除图层
 			mMapView.getMap().clear();
+			// 清除markers集合中维护的mark点
+			markers.clear();
 			break;
 		default:
 			break;
