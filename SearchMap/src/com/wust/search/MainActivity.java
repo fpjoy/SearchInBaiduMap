@@ -32,6 +32,25 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.navi.BaiduMapAppNotSupportNaviException;
+import com.baidu.mapapi.navi.BaiduMapNavigation;
+import com.baidu.mapapi.navi.NaviParaOption;
+import com.baidu.mapapi.overlayutil.DrivingRouteOverlay;
+import com.baidu.mapapi.overlayutil.OverlayManager;
+import com.baidu.mapapi.overlayutil.WalkingRouteOverlay;
+import com.baidu.mapapi.search.core.RouteLine;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.route.BikingRouteResult;
+import com.baidu.mapapi.search.route.DrivingRoutePlanOption;
+import com.baidu.mapapi.search.route.DrivingRouteResult;
+import com.baidu.mapapi.search.route.IndoorRouteResult;
+import com.baidu.mapapi.search.route.MassTransitRouteResult;
+import com.baidu.mapapi.search.route.OnGetRoutePlanResultListener;
+import com.baidu.mapapi.search.route.PlanNode;
+import com.baidu.mapapi.search.route.RoutePlanSearch;
+import com.baidu.mapapi.search.route.TransitRouteResult;
+import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
+import com.baidu.mapapi.search.route.WalkingRouteResult;
 import com.wust.search.MyOrientationListener;
 import com.wust.search.MyOrientationListener.OnOrientationListener;
 
@@ -48,7 +67,8 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends Activity implements OnClickListener,
+		OnGetRoutePlanResultListener {
 
 	private MapView mMapView;
 	private Button mLocButton;
@@ -90,8 +110,14 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	// 用户标记点的集合
 	private List<Marker> markers = new ArrayList<Marker>();
-	
-	
+
+	// 路径规划搜索接口
+	private RoutePlanSearch mSearch;
+
+	// 路线数据结构的基类
+	private RouteLine route = null;
+	private OverlayManager routeOverlay = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -119,6 +145,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		// map点击事件
 		initMapClick();
+
+		// 初始化搜索模块，注册事件监听
+		mSearch = RoutePlanSearch.newInstance();
+		mSearch.setOnGetRoutePlanResultListener(this);
 
 	}
 
@@ -166,7 +196,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		LocationClientOption option = new LocationClientOption();
 		option.setOpenGps(true); // 打开gps
 		option.setCoorType("bd09ll"); // 设置坐标类型
-		option.setScanSpan(1000);
+		option.setScanSpan(30000);
 		mLocClient.setLocOption(option);
 
 	}
@@ -215,12 +245,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		switch (item.getItemId()) {
 		case R.id.id_marker:
-			LatLng point = new LatLng(mCurrentLat + (Math.random()-0.5) * 0.005,
-					mCurrentLng + (Math.random()-0.5) * 0.005);
+			LatLng point = new LatLng(mCurrentLat + (Math.random() - 0.5)
+					* 0.005, mCurrentLng + (Math.random() - 0.5) * 0.005);
 			markerIcon = BitmapDescriptorFactory
 					.fromResource(R.drawable.icon_gcoding);
-			OverlayOptions option = new MarkerOptions().position(point).icon(
-					markerIcon).draggable(true);
+			OverlayOptions option = new MarkerOptions().position(point)
+					.icon(markerIcon).draggable(true);
 
 			Marker marker = (Marker) mBaiduMap.addOverlay(option);
 
@@ -229,21 +259,46 @@ public class MainActivity extends Activity implements OnClickListener {
 		case R.id.id_lines:
 			List<LatLng> points = new ArrayList<LatLng>();
 			points.add(new LatLng(mCurrentLat, mCurrentLng));
-			for(Marker m : markers){
+			for (Marker m : markers) {
 				points.add(m.getPosition());
 			}
-			BitmapDescriptor mRedTexture = BitmapDescriptorFactory.fromAsset("icon_road_green_arrow.png");
+			BitmapDescriptor mRedTexture = BitmapDescriptorFactory
+					.fromAsset("icon_road_green_arrow.png");
 
 			OverlayOptions ooPolyline = new PolylineOptions().width(10)
-			       .points(points).dottedLine(true).customTexture(mRedTexture);
-			//添加在地图中
-			Polyline  mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
+					.points(points).dottedLine(true).customTexture(mRedTexture);
+			// 添加在地图中
+			Polyline mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
 			break;
 		case R.id.clear:
 			// 清除图层
 			mMapView.getMap().clear();
 			// 清除markers集合中维护的mark点
 			markers.clear();
+			break;
+		case R.id.carrouting:
+			LatLng pt1 = new LatLng(mCurrentLat, mCurrentLng);
+			LatLng pt2 = null;
+			if (!markers.isEmpty()) {
+				pt2 = markers.get(0).getPosition();
+			}
+			PlanNode stNode = PlanNode.withLocation(pt1);
+			PlanNode enNode = PlanNode.withLocation(pt2);
+			mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode)
+					.to(enNode));
+			break;
+		case R.id.walkrouting:
+			System.out.println("-------6---------");
+			LatLng ptb1 = new LatLng(mCurrentLat, mCurrentLng);
+			LatLng ptb2 = null;
+			if (!markers.isEmpty()) {
+				pt2 = markers.get(0).getPosition();
+			}
+			PlanNode stbNode = PlanNode.withLocation(ptb1);
+			PlanNode enbNode = PlanNode.withLocation(ptb2);
+			mSearch.walkingSearch((new WalkingRoutePlanOption()).from(stbNode)
+					.to(enbNode));
+			System.out.println("-------7---------");
 			break;
 		default:
 			break;
@@ -292,36 +347,37 @@ public class MainActivity extends Activity implements OnClickListener {
 				mBaiduMap.hideInfoWindow();
 			}
 		});
-		
-		//调用BaiduMap对象的setOnMarkerDragListener方法设置marker拖拽的监听
+
+		// 调用BaiduMap对象的setOnMarkerDragListener方法设置marker拖拽的监听
 		mBaiduMap.setOnMarkerDragListener(new OnMarkerDragListener() {
-		    public void onMarkerDrag(Marker marker) {
-		        //拖拽中
-		    }
-		    public void onMarkerDragEnd(Marker marker) {
-		        //拖拽结束
-		    	markers.add(marker);
-		    	for(Marker m: markers){
-		    		System.out.println(m.getPosition());
-		    	}
-		    }
-		    public void onMarkerDragStart(Marker marker) {
-		        //开始拖拽
-		    	for(int x=0;x<markers.size();x++){
-		    		if(markers.get(x).getPosition()==marker.getPosition()){
-		    			markers.remove(x);
-		    			x--;
-		    		}
-		    	}
-		    }
+			public void onMarkerDrag(Marker marker) {
+				// 拖拽中
+			}
+
+			public void onMarkerDragEnd(Marker marker) {
+				// 拖拽结束
+				markers.add(marker);
+				for (Marker m : markers) {
+					System.out.println(m.getPosition());
+				}
+			}
+
+			public void onMarkerDragStart(Marker marker) {
+				// 开始拖拽
+				for (int x = 0; x < markers.size(); x++) {
+					if (markers.get(x).getPosition() == marker.getPosition()) {
+						markers.remove(x);
+						x--;
+					}
+				}
+			}
 		});
 	}
-	
+
 	//
-	
-	
+
 	// 默认点击menu菜单，菜单项不现实图标，反射强制其显示
-	 
+
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 
@@ -360,9 +416,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				isFirstLoc = false;
 				mCurrentLat = location.getLatitude();
 				mCurrentLng = location.getLongitude();
-				
+
 				LatLng ll = new LatLng(mCurrentLat, mCurrentLng);
-				
+
 				MapStatus.Builder builder = new MapStatus.Builder();
 				builder.target(ll).zoom(18.0f);
 				mBaiduMap.animateMapStatus(MapStatusUpdateFactory
@@ -419,4 +475,137 @@ public class MainActivity extends Activity implements OnClickListener {
 		// 在activity执行onPause时执行mMapView. onPause ()，实现地图生命周期管理
 		mMapView.onPause();
 	}
+
+	@Override
+	public void onGetBikingRouteResult(BikingRouteResult arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onGetDrivingRouteResult(DrivingRouteResult result) {
+		// TODO Auto-generated method stub
+		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
+			Toast.makeText(MainActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT)
+					.show();
+		}
+
+		if (result.error == SearchResult.ERRORNO.NO_ERROR) {
+
+			if (result.getRouteLines().size() >= 1) {
+				System.out.println("-------4---------");
+				route = result.getRouteLines().get(0);
+				DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(
+						mBaiduMap);
+				routeOverlay = overlay;
+				mBaiduMap.setOnMarkerClickListener(overlay);
+				overlay.setData(result.getRouteLines().get(0));
+				overlay.addToMap();
+				overlay.zoomToSpan();
+
+			} else {
+				Log.d("route result", "结果数<0");
+				return;
+			}
+		}
+
+	}
+
+	// 定制RouteOverly
+	private class MyDrivingRouteOverlay extends DrivingRouteOverlay {
+
+		public MyDrivingRouteOverlay(BaiduMap baiduMap) {
+			super(baiduMap);
+		}
+
+		@Override
+		public BitmapDescriptor getStartMarker() {
+			if (true) {
+				return BitmapDescriptorFactory.fromResource(R.drawable.icon_st);
+			}
+			return null;
+		}
+
+		@Override
+		public BitmapDescriptor getTerminalMarker() {
+			if (true) {
+				return BitmapDescriptorFactory.fromResource(R.drawable.icon_en);
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public void onGetIndoorRouteResult(IndoorRouteResult arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onGetMassTransitRouteResult(MassTransitRouteResult arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onGetTransitRouteResult(TransitRouteResult arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onGetWalkingRouteResult(WalkingRouteResult result) {
+		// TODO Auto-generated method stub
+		System.out.println("-------8---------");
+		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
+            Toast.makeText(MainActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
+        }
+        if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
+            // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
+            // result.getSuggestAddrInfo()
+        	System.out.println("-------3---------");
+            return;
+        }
+        if (result.error == SearchResult.ERRORNO.NO_ERROR) {
+        	System.out.println("-------1---------");
+            if ( result.getRouteLines().size() >= 1 ) {
+            	System.out.println("-------2---------");
+                // 直接显示
+                route = result.getRouteLines().get(0);
+                WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(mBaiduMap);
+                mBaiduMap.setOnMarkerClickListener(overlay);
+                routeOverlay = overlay;
+                overlay.setData(result.getRouteLines().get(0));
+                overlay.addToMap();
+                overlay.zoomToSpan();
+
+            } else {
+                Log.d("route result", "结果数<0" );
+                return;
+            }
+
+        }
+	}
+	private class MyWalkingRouteOverlay extends WalkingRouteOverlay {
+
+        public MyWalkingRouteOverlay(BaiduMap baiduMap) {
+            super(baiduMap);
+        }
+
+        @Override
+        public BitmapDescriptor getStartMarker() {
+            if (true) {
+                return BitmapDescriptorFactory.fromResource(R.drawable.icon_st);
+            }
+            return null;
+        }
+
+        @Override
+        public BitmapDescriptor getTerminalMarker() {
+            if (true) {
+                return BitmapDescriptorFactory.fromResource(R.drawable.icon_en);
+            }
+            return null;
+        }
+    }
 }

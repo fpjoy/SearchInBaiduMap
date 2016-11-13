@@ -26,4 +26,16 @@
         android:icon="@drawable/ic_launcher"
         android:showAsAction="never"
         android:title="清除图层"/>
+      
+      <item
+        android:id="@+id/carrouting"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="never"
+        android:title="汽车路线"/>
+      
+      <item
+        android:id="@+id/walkrouting"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="never"
+        android:title="步行路线"/>
 </menu>
