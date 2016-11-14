@@ -246,7 +246,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		switch (item.getItemId()) {
 		case R.id.id_marker:
 			LatLng point = new LatLng(mCurrentLat + (Math.random() - 0.5)
-					* 0.005, mCurrentLng + (Math.random() - 0.5) * 0.005);
+					* 0.03, mCurrentLng + (Math.random() - 0.5) * 0.03);
 			markerIcon = BitmapDescriptorFactory
 					.fromResource(R.drawable.icon_gcoding);
 			OverlayOptions option = new MarkerOptions().position(point)
@@ -277,22 +277,34 @@ public class MainActivity extends Activity implements OnClickListener,
 			markers.clear();
 			break;
 		case R.id.carrouting:
-			LatLng pt1 = new LatLng(mCurrentLat, mCurrentLng);
-			LatLng pt2 = null;
+			LatLng start = new LatLng(mCurrentLat, mCurrentLng);
+			LatLng end = null;
+
 			if (!markers.isEmpty()) {
-				pt2 = markers.get(0).getPosition();
+				end = markers.get(markers.size() - 1).getPosition();
 			}
-			PlanNode stNode = PlanNode.withLocation(pt1);
-			PlanNode enNode = PlanNode.withLocation(pt2);
+			// 途径点的集合
+			List<PlanNode> wayPoints = new ArrayList<PlanNode>();
+			for (int x = 0; x < markers.size() - 1; x++) {
+				PlanNode wayPoint = PlanNode.withLocation(markers.get(x)
+						.getPosition());
+				wayPoints.add(wayPoint);
+			}
+			for (PlanNode pn : wayPoints){
+				System.out.println(pn);
+			}
+
+			PlanNode stNode = PlanNode.withLocation(start);
+			PlanNode enNode = PlanNode.withLocation(end);
 			mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode)
-					.to(enNode));
+					.passBy(wayPoints).to(enNode));
 			break;
 		case R.id.walkrouting:
 			System.out.println("-------6---------");
 			LatLng ptb1 = new LatLng(mCurrentLat, mCurrentLng);
 			LatLng ptb2 = null;
 			if (!markers.isEmpty()) {
-				pt2 = markers.get(0).getPosition();
+				end = markers.get(0).getPosition();
 			}
 			PlanNode stbNode = PlanNode.withLocation(ptb1);
 			PlanNode enbNode = PlanNode.withLocation(ptb2);
@@ -420,7 +432,7 @@ public class MainActivity extends Activity implements OnClickListener,
 				LatLng ll = new LatLng(mCurrentLat, mCurrentLng);
 
 				MapStatus.Builder builder = new MapStatus.Builder();
-				builder.target(ll).zoom(18.0f);
+				builder.target(ll).zoom(15.0f);
 				mBaiduMap.animateMapStatus(MapStatusUpdateFactory
 						.newMapStatus(builder.build()));
 			}
@@ -558,54 +570,57 @@ public class MainActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 		System.out.println("-------8---------");
 		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(MainActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
-        }
-        if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
-            // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
-            // result.getSuggestAddrInfo()
-        	System.out.println("-------3---------");
-            return;
-        }
-        if (result.error == SearchResult.ERRORNO.NO_ERROR) {
-        	System.out.println("-------1---------");
-            if ( result.getRouteLines().size() >= 1 ) {
-            	System.out.println("-------2---------");
-                // 直接显示
-                route = result.getRouteLines().get(0);
-                WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(mBaiduMap);
-                mBaiduMap.setOnMarkerClickListener(overlay);
-                routeOverlay = overlay;
-                overlay.setData(result.getRouteLines().get(0));
-                overlay.addToMap();
-                overlay.zoomToSpan();
+			Toast.makeText(MainActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT)
+					.show();
+		}
+		if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
+			// 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
+			// result.getSuggestAddrInfo()
+			System.out.println("-------3---------");
+			return;
+		}
+		if (result.error == SearchResult.ERRORNO.NO_ERROR) {
+			System.out.println("-------1---------");
+			if (result.getRouteLines().size() >= 1) {
+				System.out.println("-------2---------");
+				// 直接显示
+				route = result.getRouteLines().get(0);
+				WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(
+						mBaiduMap);
+				mBaiduMap.setOnMarkerClickListener(overlay);
+				routeOverlay = overlay;
+				overlay.setData(result.getRouteLines().get(0));
+				overlay.addToMap();
+				overlay.zoomToSpan();
 
-            } else {
-                Log.d("route result", "结果数<0" );
-                return;
-            }
+			} else {
+				Log.d("route result", "结果数<0");
+				return;
+			}
 
-        }
+		}
 	}
+
 	private class MyWalkingRouteOverlay extends WalkingRouteOverlay {
 
-        public MyWalkingRouteOverlay(BaiduMap baiduMap) {
-            super(baiduMap);
-        }
+		public MyWalkingRouteOverlay(BaiduMap baiduMap) {
+			super(baiduMap);
+		}
 
-        @Override
-        public BitmapDescriptor getStartMarker() {
-            if (true) {
-                return BitmapDescriptorFactory.fromResource(R.drawable.icon_st);
-            }
-            return null;
-        }
+		@Override
+		public BitmapDescriptor getStartMarker() {
+			if (true) {
+				return BitmapDescriptorFactory.fromResource(R.drawable.icon_st);
+			}
+			return null;
+		}
 
-        @Override
-        public BitmapDescriptor getTerminalMarker() {
-            if (true) {
-                return BitmapDescriptorFactory.fromResource(R.drawable.icon_en);
-            }
-            return null;
-        }
-    }
+		@Override
+		public BitmapDescriptor getTerminalMarker() {
+			if (true) {
+				return BitmapDescriptorFactory.fromResource(R.drawable.icon_en);
+			}
+			return null;
+		}
+	}
 }
