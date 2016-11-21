@@ -22,18 +22,18 @@ public class MyOrientationListener implements SensorEventListener
 		this.context = context;
 	}
 
-	// ¿ªÊ¼
+	// å¼€å§‹
 	public void start()
 	{
-		// »ñµÃ´«¸ÐÆ÷¹ÜÀíÆ÷
+		// èŽ·å¾—ä¼ æ„Ÿå™¨ç®¡ç†å™¨
 		sensorManager = (SensorManager) context
 				.getSystemService(Context.SENSOR_SERVICE);
 		if (sensorManager != null)
 		{
-			// »ñµÃ·½Ïò´«¸ÐÆ÷
+			// èŽ·å¾—æ–¹å‘ä¼ æ„Ÿå™¨
 			sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 		}
-		// ×¢²á
+		// æ³¨å†Œ
 		if (sensor != null)
 		{//SensorManager.SENSOR_DELAY_UI
 			sensorManager.registerListener(this, sensor,
@@ -42,7 +42,7 @@ public class MyOrientationListener implements SensorEventListener
 
 	}
 
-	// Í£Ö¹¼ì²â
+	// åœæ­¢æ£€æµ‹
 	public void stop()
 	{
 		sensorManager.unregisterListener(this);
@@ -57,10 +57,10 @@ public class MyOrientationListener implements SensorEventListener
 	@Override
 	public void onSensorChanged(SensorEvent event)
 	{
-		// ½ÓÊÜ·½Ïò¸ÐÓ¦Æ÷µÄÀàÐÍ  
+		// æŽ¥å—æ–¹å‘æ„Ÿåº”å™¨çš„ç±»åž‹  
         if (event.sensor.getType() == Sensor.TYPE_ORIENTATION)  
         {  
-            // ÕâÀïÎÒÃÇ¿ÉÒÔµÃµ½Êý¾Ý£¬È»ºó¸ù¾ÝÐèÒªÀ´´¦Àí  
+            // è¿™é‡Œæˆ‘ä»¬å¯ä»¥å¾—åˆ°æ•°æ®ï¼Œç„¶åŽæ ¹æ®éœ€è¦æ¥å¤„ç†  
             float x = event.values[SensorManager.DATA_X];  
             
             if( Math.abs(x- lastX) > 1.0 )

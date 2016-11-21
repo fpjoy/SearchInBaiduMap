@@ -73,88 +73,88 @@ public class MainActivity extends Activity implements OnClickListener,
 	private MapView mMapView;
 	private Button mLocButton;
 
-	// °Ù¶ÈµØÍ¼¶ÔÏó
+	// ç™¾åº¦åœ°å›¾å¯¹è±¡
 	private BaiduMap mBaiduMap;
 
-	// ¶¨Î»·şÎñµÄ¿Í»§¶Ë
+	// å®šä½æœåŠ¡çš„å®¢æˆ·ç«¯
 	private LocationClient mLocClient;
 
-	// ¶¨Î»ÇëÇó»Øµ÷½Ó¿Ú
+	// å®šä½è¯·æ±‚å›è°ƒæ¥å£
 	private BDLocationListener mLocListener;
 
-	// ¶¨Î»Í¼²ãÏÔÊ¾·½Ê½ COMPASS,FOLLOWING,NORMAL
+	// å®šä½å›¾å±‚æ˜¾ç¤ºæ–¹å¼ COMPASS,FOLLOWING,NORMAL
 	private LocationMode mCurrentMode;
 
-	// ÊÇ·ñÊÇµÚÒ»´Î¶¨Î»
+	// æ˜¯å¦æ˜¯ç¬¬ä¸€æ¬¡å®šä½
 	private boolean isFirstLoc;
 
-	// µ±Ç°Í¼±ê ÒÔ¼° markÍ¼±ê
+	// å½“å‰å›¾æ ‡ ä»¥åŠ markå›¾æ ‡
 	private BitmapDescriptor mCurrentIcon;
 	private BitmapDescriptor markerIcon;
 
-	// µ±Ç°µÄ¾­Î³¶È
+	// å½“å‰çš„ç»çº¬åº¦
 	private double mCurrentLng;
 	private double mCurrentLat;
 
-	// ·½Ïò´«¸ĞÆ÷¼àÌıÆ÷
+	// æ–¹å‘ä¼ æ„Ÿå™¨ç›‘å¬å™¨
 	private MyOrientationListener mOrientationListener;
 
-	// µ±Ç°µÄ¾«¶È
+	// å½“å‰çš„ç²¾åº¦
 	private float mCurrentAccracy;
 
-	// ·½Ïò´«¸ĞÆ÷X·½ÏòµÄÖµ
+	// æ–¹å‘ä¼ æ„Ÿå™¨Xæ–¹å‘çš„å€¼
 	private int mXDirection;
 
-	// ÔÚµØÍ¼ÖĞÏÔÊ¾Ò»¸öĞÅÏ¢´°¿Ú
+	// åœ¨åœ°å›¾ä¸­æ˜¾ç¤ºä¸€ä¸ªä¿¡æ¯çª—å£
 	private InfoWindow mInfoWindow;
 
-	// ÓÃ»§±ê¼ÇµãµÄ¼¯ºÏ
+	// ç”¨æˆ·æ ‡è®°ç‚¹çš„é›†åˆ
 	private List<Marker> markers = new ArrayList<Marker>();
 
-	// Â·¾¶¹æ»®ËÑË÷½Ó¿Ú
+	// è·¯å¾„è§„åˆ’æœç´¢æ¥å£
 	private RoutePlanSearch mSearch;
 
-	// Â·ÏßÊı¾İ½á¹¹µÄ»ùÀà
+	// è·¯çº¿æ•°æ®ç»“æ„çš„åŸºç±»
 	private RouteLine route = null;
 	private OverlayManager routeOverlay = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// ÉèÖÃÍ¸Ã÷ActionBar
+		// è®¾ç½®é€æ˜ActionBar
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		ColorDrawable mDrawable = new ColorDrawable();
 		mDrawable.setColor(Color.BLACK);
 		mDrawable.setAlpha(100);
 		getActionBar().setBackgroundDrawable(mDrawable);
-		// ÔÚÊ¹ÓÃSDK¸÷×é¼şÖ®Ç°³õÊ¼»¯contextĞÅÏ¢£¬´«ÈëApplicationContext
-		// ×¢Òâ¸Ã·½·¨ÒªÔÙsetContentView·½·¨Ö®Ç°ÊµÏÖ
+		// åœ¨ä½¿ç”¨SDKå„ç»„ä»¶ä¹‹å‰åˆå§‹åŒ–contextä¿¡æ¯ï¼Œä¼ å…¥ApplicationContext
+		// æ³¨æ„è¯¥æ–¹æ³•è¦å†setContentViewæ–¹æ³•ä¹‹å‰å®ç°
 		SDKInitializer.initialize(getApplicationContext());
 		setContentView(R.layout.activity_main);
-		// »ñÈ¡µØÍ¼¿Ø¼şÒıÓÃ
+		// è·å–åœ°å›¾æ§ä»¶å¼•ç”¨
 
 		initView();
 
 		initLoc();
 
-		// ´«¸ĞÆ÷³õÊ¼»¯
+		// ä¼ æ„Ÿå™¨åˆå§‹åŒ–
 		initOritationListener();
 
-		// markerµã»÷ÊÂ¼ş
+		// markerç‚¹å‡»äº‹ä»¶
 		initMarkerClick();
 
-		// mapµã»÷ÊÂ¼ş
+		// mapç‚¹å‡»äº‹ä»¶
 		initMapClick();
 
-		// ³õÊ¼»¯ËÑË÷Ä£¿é£¬×¢²áÊÂ¼ş¼àÌı
+		// åˆå§‹åŒ–æœç´¢æ¨¡å—ï¼Œæ³¨å†Œäº‹ä»¶ç›‘å¬
 		mSearch = RoutePlanSearch.newInstance();
 		mSearch.setOnGetRoutePlanResultListener(this);
 
 	}
 
-	// ÊÓÍ¼³õÊ¼»¯
+	// è§†å›¾åˆå§‹åŒ–
 	private void initView() {
-		// µØÍ¼³õÊ¼»¯
+		// åœ°å›¾åˆå§‹åŒ–
 		mMapView = (MapView) findViewById(R.id.bmapView);
 		mBaiduMap = mMapView.getMap();
 
@@ -164,7 +164,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	}
 
-	// ´«¸ĞÆ÷³õÊ¼»¯
+	// ä¼ æ„Ÿå™¨åˆå§‹åŒ–
 	private void initOritationListener() {
 		// TODO Auto-generated method stub
 		mOrientationListener = new MyOrientationListener(
@@ -174,19 +174,19 @@ public class MainActivity extends Activity implements OnClickListener,
 					@Override
 					public void onOrientationChanged(float x) {
 						mXDirection = (int) x;
-						// ¹¹Ôì¶¨Î»Êı¾İ
+						// æ„é€ å®šä½æ•°æ®
 						MyLocationData locData = new MyLocationData.Builder()
 								.accuracy(mCurrentAccracy)
-								// ´Ë´¦ÉèÖÃ¿ª·¢Õß»ñÈ¡µ½µÄ·½ÏòĞÅÏ¢£¬Ë³Ê±Õë0-360
+								// æ­¤å¤„è®¾ç½®å¼€å‘è€…è·å–åˆ°çš„æ–¹å‘ä¿¡æ¯ï¼Œé¡ºæ—¶é’ˆ0-360
 								.direction(mXDirection).latitude(mCurrentLat)
 								.longitude(mCurrentLng).build();
-						// ÉèÖÃ¶¨Î»Êı¾İ
+						// è®¾ç½®å®šä½æ•°æ®
 						mBaiduMap.setMyLocationData(locData);
 					}
 				});
 	}
 
-	// ¶¨Î»³õÊ¼»¯
+	// å®šä½åˆå§‹åŒ–
 	private void initLoc() {
 		isFirstLoc = true;
 		mCurrentMode = LocationMode.NORMAL;
@@ -194,8 +194,8 @@ public class MainActivity extends Activity implements OnClickListener,
 		mLocListener = new MyLocationListener();
 		mLocClient.registerLocationListener(mLocListener);
 		LocationClientOption option = new LocationClientOption();
-		option.setOpenGps(true); // ´ò¿ªgps
-		option.setCoorType("bd09ll"); // ÉèÖÃ×ø±êÀàĞÍ
+		option.setOpenGps(true); // æ‰“å¼€gps
+		option.setCoorType("bd09ll"); // è®¾ç½®åæ ‡ç±»å‹
 		option.setScanSpan(30000);
 		mLocClient.setLocOption(option);
 
@@ -239,7 +239,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	// ²Ëµ¥menuÏîÄ¿µã»÷ÊÂ¼ş
+	// èœå•menué¡¹ç›®ç‚¹å‡»äº‹ä»¶
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -267,13 +267,13 @@ public class MainActivity extends Activity implements OnClickListener,
 
 			OverlayOptions ooPolyline = new PolylineOptions().width(10)
 					.points(points).dottedLine(true).customTexture(mRedTexture);
-			// Ìí¼ÓÔÚµØÍ¼ÖĞ
+			// æ·»åŠ åœ¨åœ°å›¾ä¸­
 			Polyline mPolyline = (Polyline) mBaiduMap.addOverlay(ooPolyline);
 			break;
 		case R.id.clear:
-			// Çå³ıÍ¼²ã
+			// æ¸…é™¤å›¾å±‚
 			mMapView.getMap().clear();
-			// Çå³ımarkers¼¯ºÏÖĞÎ¬»¤µÄmarkµã
+			// æ¸…é™¤markersé›†åˆä¸­ç»´æŠ¤çš„markç‚¹
 			markers.clear();
 			break;
 		case R.id.carrouting:
@@ -283,7 +283,7 @@ public class MainActivity extends Activity implements OnClickListener,
 			if (!markers.isEmpty()) {
 				end = markers.get(markers.size() - 1).getPosition();
 			}
-			// Í¾¾¶µãµÄ¼¯ºÏ
+			// é€”å¾„ç‚¹çš„é›†åˆ
 			List<PlanNode> wayPoints = new ArrayList<PlanNode>();
 			for (int x = 0; x < markers.size() - 1; x++) {
 				PlanNode wayPoint = PlanNode.withLocation(markers.get(x)
@@ -319,7 +319,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		return super.onOptionsItemSelected(item);
 	}
 
-	// ÎªmarkerÉèÖÃµã»÷ÊÂ¼ş
+	// ä¸ºmarkerè®¾ç½®ç‚¹å‡»äº‹ä»¶
 	private void initMarkerClick() {
 		mBaiduMap.setOnMarkerClickListener(new OnMarkerClickListener() {
 
@@ -328,7 +328,7 @@ public class MainActivity extends Activity implements OnClickListener,
 				Button button = new Button(getApplicationContext());
 				button.setBackgroundResource(R.drawable.location_tips);
 				// OnInfoWindowClickListener listener = null;
-				button.setText("É¾³ı");
+				button.setText("åˆ é™¤");
 				button.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
 						marker.remove();
@@ -344,7 +344,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	}
 
-	// mapµã»÷ÊÂ¼ş
+	// mapç‚¹å‡»äº‹ä»¶
 	private void initMapClick() {
 		mBaiduMap.setOnMapClickListener(new OnMapClickListener() {
 
@@ -355,19 +355,19 @@ public class MainActivity extends Activity implements OnClickListener,
 
 			@Override
 			public void onMapClick(LatLng arg0) {
-				// Òş²Ømarkerµã»÷µ¯³öµÄbutton
+				// éšè—markerç‚¹å‡»å¼¹å‡ºçš„button
 				mBaiduMap.hideInfoWindow();
 			}
 		});
 
-		// µ÷ÓÃBaiduMap¶ÔÏóµÄsetOnMarkerDragListener·½·¨ÉèÖÃmarkerÍÏ×§µÄ¼àÌı
+		// è°ƒç”¨BaiduMapå¯¹è±¡çš„setOnMarkerDragListeneræ–¹æ³•è®¾ç½®markeræ‹–æ‹½çš„ç›‘å¬
 		mBaiduMap.setOnMarkerDragListener(new OnMarkerDragListener() {
 			public void onMarkerDrag(Marker marker) {
-				// ÍÏ×§ÖĞ
+				// æ‹–æ‹½ä¸­
 			}
 
 			public void onMarkerDragEnd(Marker marker) {
-				// ÍÏ×§½áÊø
+				// æ‹–æ‹½ç»“æŸ
 				markers.add(marker);
 				for (Marker m : markers) {
 					System.out.println(m.getPosition());
@@ -375,7 +375,7 @@ public class MainActivity extends Activity implements OnClickListener,
 			}
 
 			public void onMarkerDragStart(Marker marker) {
-				// ¿ªÊ¼ÍÏ×§
+				// å¼€å§‹æ‹–æ‹½
 				for (int x = 0; x < markers.size(); x++) {
 					if (markers.get(x).getPosition() == marker.getPosition()) {
 						markers.remove(x);
@@ -388,7 +388,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	//
 
-	// Ä¬ÈÏµã»÷menu²Ëµ¥£¬²Ëµ¥Ïî²»ÏÖÊµÍ¼±ê£¬·´ÉäÇ¿ÖÆÆäÏÔÊ¾
+	// é»˜è®¤ç‚¹å‡»menuèœå•ï¼Œèœå•é¡¹ä¸ç°å®å›¾æ ‡ï¼Œåå°„å¼ºåˆ¶å…¶æ˜¾ç¤º
 
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
@@ -413,13 +413,13 @@ public class MainActivity extends Activity implements OnClickListener,
 		@Override
 		public void onReceiveLocation(BDLocation location) {
 			// TODO Auto-generated method stub
-			// map view Ïú»Ùºó²»ÔÚ´¦ÀíĞÂ½ÓÊÕµÄÎ»ÖÃ
+			// map view é”€æ¯åä¸åœ¨å¤„ç†æ–°æ¥æ”¶çš„ä½ç½®
 			if (location == null || mMapView == null) {
 				return;
 			}
 			MyLocationData locData = new MyLocationData.Builder()
 					.accuracy(location.getRadius())
-					// ´Ë´¦ÉèÖÃ¿ª·¢Õß»ñÈ¡µ½µÄ·½ÏòĞÅÏ¢£¬Ë³Ê±Õë0-360
+					// æ­¤å¤„è®¾ç½®å¼€å‘è€…è·å–åˆ°çš„æ–¹å‘ä¿¡æ¯ï¼Œé¡ºæ—¶é’ˆ0-360
 					.direction(mXDirection).latitude(location.getLatitude())
 					.longitude(location.getLongitude()).build();
 			mBaiduMap.setMyLocationData(locData);
@@ -445,12 +445,12 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	@Override
 	protected void onStart() {
-		// ¿ªÆôÍ¼²ã¶¨Î»
+		// å¼€å¯å›¾å±‚å®šä½
 		mBaiduMap.setMyLocationEnabled(true);
 		if (!mLocClient.isStarted()) {
 			mLocClient.start();
 		}
-		// // ¿ªÆô·½Ïò´«¸ĞÆ÷
+		// // å¼€å¯æ–¹å‘ä¼ æ„Ÿå™¨
 		mOrientationListener.start();
 		super.onStart();
 	}
@@ -458,11 +458,11 @@ public class MainActivity extends Activity implements OnClickListener,
 	//
 	@Override
 	protected void onStop() {
-		// ¹Ø±ÕÍ¼²ã¶¨Î»
+		// å…³é—­å›¾å±‚å®šä½
 		mBaiduMap.setMyLocationEnabled(false);
 		mLocClient.stop();
 
-		// ¹Ø±Õ·½Ïò´«¸ĞÆ÷
+		// å…³é—­æ–¹å‘ä¼ æ„Ÿå™¨
 		mOrientationListener.stop();
 		super.onStop();
 	}
@@ -470,21 +470,21 @@ public class MainActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		// ÔÚactivityÖ´ĞĞonDestroyÊ±Ö´ĞĞmMapView.onDestroy()£¬ÊµÏÖµØÍ¼ÉúÃüÖÜÆÚ¹ÜÀí
+		// åœ¨activityæ‰§è¡ŒonDestroyæ—¶æ‰§è¡ŒmMapView.onDestroy()ï¼Œå®ç°åœ°å›¾ç”Ÿå‘½å‘¨æœŸç®¡ç†
 		mMapView.onDestroy();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// ÔÚactivityÖ´ĞĞonResumeÊ±Ö´ĞĞmMapView. onResume ()£¬ÊµÏÖµØÍ¼ÉúÃüÖÜÆÚ¹ÜÀí
+		// åœ¨activityæ‰§è¡ŒonResumeæ—¶æ‰§è¡ŒmMapView. onResume ()ï¼Œå®ç°åœ°å›¾ç”Ÿå‘½å‘¨æœŸç®¡ç†
 		mMapView.onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		// ÔÚactivityÖ´ĞĞonPauseÊ±Ö´ĞĞmMapView. onPause ()£¬ÊµÏÖµØÍ¼ÉúÃüÖÜÆÚ¹ÜÀí
+		// åœ¨activityæ‰§è¡ŒonPauseæ—¶æ‰§è¡ŒmMapView. onPause ()ï¼Œå®ç°åœ°å›¾ç”Ÿå‘½å‘¨æœŸç®¡ç†
 		mMapView.onPause();
 	}
 
@@ -498,7 +498,7 @@ public class MainActivity extends Activity implements OnClickListener,
 	public void onGetDrivingRouteResult(DrivingRouteResult result) {
 		// TODO Auto-generated method stub
 		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-			Toast.makeText(MainActivity.this, "±§Ç¸£¬Î´ÕÒµ½½á¹û", Toast.LENGTH_SHORT)
+			Toast.makeText(MainActivity.this, "æŠ±æ­‰ï¼Œæœªæ‰¾åˆ°ç»“æœ", Toast.LENGTH_SHORT)
 					.show();
 		}
 
@@ -516,14 +516,14 @@ public class MainActivity extends Activity implements OnClickListener,
 				overlay.zoomToSpan();
 
 			} else {
-				Log.d("route result", "½á¹ûÊı<0");
+				Log.d("route result", "ç»“æœæ•°<0");
 				return;
 			}
 		}
 
 	}
 
-	// ¶¨ÖÆRouteOverly
+	// å®šåˆ¶RouteOverly
 	private class MyDrivingRouteOverlay extends DrivingRouteOverlay {
 
 		public MyDrivingRouteOverlay(BaiduMap baiduMap) {
@@ -570,11 +570,11 @@ public class MainActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 		System.out.println("-------8---------");
 		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-			Toast.makeText(MainActivity.this, "±§Ç¸£¬Î´ÕÒµ½½á¹û", Toast.LENGTH_SHORT)
+			Toast.makeText(MainActivity.this, "æŠ±æ­‰ï¼Œæœªæ‰¾åˆ°ç»“æœ", Toast.LENGTH_SHORT)
 					.show();
 		}
 		if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
-			// ÆğÖÕµã»òÍ¾¾­µãµØÖ·ÓĞáªÒå£¬Í¨¹ıÒÔÏÂ½Ó¿Ú»ñÈ¡½¨Òé²éÑ¯ĞÅÏ¢
+			// èµ·ç»ˆç‚¹æˆ–é€”ç»ç‚¹åœ°å€æœ‰å²ä¹‰ï¼Œé€šè¿‡ä»¥ä¸‹æ¥å£è·å–å»ºè®®æŸ¥è¯¢ä¿¡æ¯
 			// result.getSuggestAddrInfo()
 			System.out.println("-------3---------");
 			return;
@@ -583,7 +583,7 @@ public class MainActivity extends Activity implements OnClickListener,
 			System.out.println("-------1---------");
 			if (result.getRouteLines().size() >= 1) {
 				System.out.println("-------2---------");
-				// Ö±½ÓÏÔÊ¾
+				// ç›´æ¥æ˜¾ç¤º
 				route = result.getRouteLines().get(0);
 				WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(
 						mBaiduMap);
@@ -594,7 +594,7 @@ public class MainActivity extends Activity implements OnClickListener,
 				overlay.zoomToSpan();
 
 			} else {
-				Log.d("route result", "½á¹ûÊı<0");
+				Log.d("route result", "ç»“æœæ•°<0");
 				return;
 			}
 
