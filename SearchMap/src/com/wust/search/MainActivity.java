@@ -297,7 +297,12 @@ public class MainActivity extends Activity implements OnClickListener,
 			PlanNode stNode = PlanNode.withLocation(start);
 			PlanNode enNode = PlanNode.withLocation(end);
 			mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode)
-					.passBy(wayPoints).to(enNode));
+					.passBy(wayPoints).to(enNode)
+					.trafficPolicy(DrivingRoutePlanOption.DrivingTrafficPolicy.ROUTE_PATH_AND_TRAFFIC)
+				//	.policy(DrivingRoutePlanOption.DrivingPolicy.ECAR_TIME_FIRST)
+				//	.policy(DrivingRoutePlanOption.DrivingPolicy.ECAR_DIS_FIRST)
+					.policy(DrivingRoutePlanOption.DrivingPolicy.ECAR_AVOID_JAM)
+					);
 			break;
 		case R.id.walkrouting:
 			System.out.println("-------6---------");
